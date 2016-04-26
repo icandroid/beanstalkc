@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""beanstalkc - A beanstalkd Client Library for Python"""
+"""beanstalkc - A beanstalkd Client Library for Python3"""
 
 import logging
 import socket
@@ -7,6 +7,7 @@ import sys
 
 
 __license__ = '''
+Copyright (C) 2016      Peixu Zhu
 Copyright (C) 2008-2015 Andreas Bolka
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +23,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 
 
 DEFAULT_HOST = 'localhost'
@@ -78,7 +79,7 @@ class Connection(object):
     def close(self):
         """Close connection to server."""
         try:
-            self._socket.sendall('quit\r\n')
+            self._socket.sendall(str.encode('quit\r\n'))
         except socket.error:
             pass
         try:
@@ -92,7 +93,7 @@ class Connection(object):
         self.connect()
 
     def _interact(self, command, expected_ok, expected_err=[]):
-        SocketError.wrap(self._socket.sendall, command)
+        SocketError.wrap(self._socket.sendall, str.encode(command) )
         status, results = self._read_response()
         if status in expected_ok:
             return results
@@ -102,7 +103,8 @@ class Connection(object):
             raise UnexpectedResponse(command.split()[0], status, results)
 
     def _read_response(self):
-        line = SocketError.wrap(self._socket_file.readline)
+        line_bytes  = SocketError.wrap(self._socket_file.readline)
+        line        = line_bytes.decode()
         if not line:
             raise SocketError()
         response = line.split()
